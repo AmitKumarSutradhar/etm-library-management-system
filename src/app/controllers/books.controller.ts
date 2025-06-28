@@ -5,11 +5,26 @@ export const booksRoutes = express.Router();
 
 
 booksRoutes.get('/', async (req: Request, res: Response) => {
-    const books = await Book.find();
+
+    const { filter, sortBy = 'createdAt', sort = 'desc', limit = 10 } = req.query;
+
+    const query: { [key: string]: any } = {};
+    if (filter) {
+        query.genre = { $regex: filter, $options: 'i' };
+    }
+
+    const sortOption: { [key: string]: 1 | -1 } = {};
+    sortOption[sortBy] = sort === 'desc' ? -1 : 1;
+
+    const limitVal = parseInt(typeof limit === 'string' ? limit : '10', 10);
+
+    const books = await Book.find(query)
+        .sort(sortOption)
+        .limit(limitVal);
 
     res.status(200).json({
         "success": true,
-        "message": "Book created successfully",
+        "message": "Books retrieved successfully",
         "data": books
     })
 })
