@@ -8,13 +8,13 @@ booksRoutes.get('/', async (req: Request, res: Response) => {
     const books = await Book.find();
 
     res.status(200).json({
-        success: true,
-        message: "Book list",
-        books: books
+        "success": true,
+        "message": "Book created successfully",
+        "data": books
     })
 })
 
-booksRoutes.post('/api/books', async (req: Request, res: Response) => {
+booksRoutes.post('/', async (req: Request, res: Response) => {
     const body = req.body;
     const book = await Book.create(body);
 
