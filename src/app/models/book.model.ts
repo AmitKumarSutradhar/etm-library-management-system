@@ -1,6 +1,11 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { Model, model } from 'mongoose';
 import { IBook } from '../interfaces/book.interface';
 const { Schema } = mongoose;
+
+
+interface IBookModel extends Model<IBook> {
+    borrowBook(bookId: string, quantity: number): Promise<IBook>;
+}
 
 const bookSchema = new Schema<IBook>({
     title: { type: String, required: true, trim: true },
@@ -25,7 +30,7 @@ const bookSchema = new Schema<IBook>({
     timestamps: true,
 });
 
-bookSchema.static.borrow = async function (bookId: string, quantity: number) {
+bookSchema.statics.borrowBook = async function (bookId: string, quantity: number) {
     const book = await this.findById(bookId);
 
     if (!book) {
@@ -46,4 +51,4 @@ bookSchema.static.borrow = async function (bookId: string, quantity: number) {
     return book;
 }
 
-export const Book = model<IBook>("Book", bookSchema)
+export const Book = model<IBook, IBookModel>("Book", bookSchema)
