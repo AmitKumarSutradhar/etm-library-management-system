@@ -1,8 +1,8 @@
 import mongoose, { model } from 'mongoose';
-import { IBooks } from '../interfaces/books.interface';
+import { IBook } from '../interfaces/book.interface';
 const { Schema } = mongoose;
 
-const bookSchema = new Schema<IBooks>({
+const bookSchema = new Schema<IBook>({
     title: { type: String, required: true, trim: true },
     author: { type: String, required: true },
     genre: {
@@ -20,9 +20,30 @@ const bookSchema = new Schema<IBooks>({
         type: Boolean,
         default: true
     },
-},{
+}, {
     versionKey: false,
     timestamps: true,
 });
 
-export const Book = model<IBooks>("Book", bookSchema)
+bookSchema.static.borrow = async function (bookId: string, quantity: number) {
+    const book = await this.findById(bookId);
+
+    if (!book) {
+        throw new Error('Book not found');
+    }
+
+    if (book.copies < quantity) {
+        throw new Error('Not enough copies available');
+    }
+
+    book.copies -= quantity;
+
+    if (book.copies === 0) {
+        book.available = false;
+    }
+
+    await book.save();
+    return book;
+}
+
+export const Book = model<IBook>("Book", bookSchema)
